@@ -329,6 +329,141 @@
             background: #fef3c7;
             color: #92400e;
         }
+
+        .admin-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            transition: transform 0.2s;
+            z-index: 999;
+        }
+
+        .admin-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .admin-panel {
+            background: #f9fafb;
+            border-left: 3px solid #3b82f6;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+        }
+
+        .admin-panel h3 {
+            color: #1f2937;
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+
+        .admin-section {
+            background: white;
+            padding: 20px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            border: 1px solid #e5e7eb;
+        }
+
+        .admin-section h4 {
+            font-size: 14px;
+            color: #374151;
+            margin-bottom: 12px;
+            font-weight: 600;
+        }
+
+        .setting-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #f3f4f6;
+        }
+
+        .setting-row:last-child {
+            border-bottom: none;
+        }
+
+        .setting-label {
+            font-size: 14px;
+            color: #1f2937;
+        }
+
+        .tag-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .tag {
+            background: #e0e7ff;
+            color: #3730a3;
+            padding: 6px 12px;
+            border-radius: 16px;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .tag button {
+            background: none;
+            border: none;
+            color: #3730a3;
+            cursor: pointer;
+            font-size: 16px;
+            line-height: 1;
+            padding: 0;
+        }
+
+        .tag button:hover {
+            color: #1e1b4b;
+        }
+
+        .add-item-form {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .add-item-form input {
+            flex: 1;
+            padding: 8px 12px;
+            border: 2px solid #e5e7eb;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .add-item-form button {
+            padding: 8px 16px;
+            background: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .add-item-form button:hover {
+            background: #2563eb;
+        }
+
+        .color-input {
+            width: 60px;
+            height: 36px;
+            border: 2px solid #e5e7eb;
+            border-radius: 6px;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
@@ -508,7 +643,99 @@
         </div>
     </div>
 
+    <!-- Admin Modal -->
+    <div id="adminModal" class="modal">
+        <div class="modal-content" style="max-width: 800px;">
+            <div class="modal-header">
+                <h2>Admin Dashboard</h2>
+                <button class="close-btn" onclick="closeAdminModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="admin-panel">
+                    <h3>⚙️ System Settings</h3>
+                    
+                    <div class="admin-section">
+                        <h4>Program Types</h4>
+                        <div class="tag-list" id="programTypesList"></div>
+                        <div class="add-item-form">
+                            <input type="text" id="newProgramType" placeholder="Add new program type...">
+                            <button onclick="addProgramType()">Add</button>
+                        </div>
+                    </div>
+
+                    <div class="admin-section">
+                        <h4>Status Options</h4>
+                        <div class="tag-list" id="statusOptionsList"></div>
+                        <div class="add-item-form">
+                            <input type="text" id="newStatusOption" placeholder="Add new status...">
+                            <button onclick="addStatusOption()">Add</button>
+                        </div>
+                    </div>
+
+                    <div class="admin-section">
+                        <h4>Louisiana Parishes (Quick Add)</h4>
+                        <div class="tag-list" id="parishList"></div>
+                        <div class="add-item-form">
+                            <input type="text" id="newParish" placeholder="Add parish...">
+                            <button onclick="addParish()">Add</button>
+                        </div>
+                    </div>
+
+                    <div class="admin-section">
+                        <h4>Appearance Settings</h4>
+                        <div class="setting-row">
+                            <span class="setting-label">Organization Name</span>
+                            <input type="text" id="orgName" style="width: 300px; padding: 8px; border: 2px solid #e5e7eb; border-radius: 6px;" value="Louisiana Growth Network">
+                        </div>
+                        <div class="setting-row">
+                            <span class="setting-label">Subtitle</span>
+                            <input type="text" id="subtitle" style="width: 300px; padding: 8px; border: 2px solid #e5e7eb; border-radius: 6px;" value="Second-Stage Program Tracker">
+                        </div>
+                        <div class="setting-row">
+                            <span class="setting-label">Primary Color</span>
+                            <input type="color" id="primaryColor" class="color-input" value="#3b82f6">
+                        </div>
+                    </div>
+
+                    <div class="admin-section">
+                        <h4>Data Management</h4>
+                        <div class="setting-row">
+                            <span class="setting-label">Total Companies</span>
+                            <span id="adminTotalCompanies" style="font-weight: 600;">0</span>
+                        </div>
+                        <div class="setting-row">
+                            <span class="setting-label">Export Data Backup</span>
+                            <button class="btn btn-secondary btn-small" onclick="exportBackup()">Download Backup JSON</button>
+                        </div>
+                        <div class="setting-row">
+                            <span class="setting-label">Import Data Backup</span>
+                            <input type="file" id="importBackup" accept=".json" onchange="importBackup(event)" style="font-size: 14px;">
+                        </div>
+                    </div>
+
+                    <div class="controls">
+                        <button class="btn btn-primary" onclick="saveAdminSettings()">Save Settings</button>
+                        <button class="btn btn-secondary" onclick="resetToDefaults()">Reset to Defaults</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Button -->
+    <button class="admin-btn" onclick="openAdminModal()" title="Admin Dashboard">⚙️</button>
+
     <script>
+        // Admin Settings with Defaults
+        let adminSettings = JSON.parse(localStorage.getItem('lgnAdminSettings')) || {
+            programTypes: ['SIG', 'CEO Roundtable', 'Other'],
+            statusOptions: ['Pending', 'Active', 'Completed'],
+            parishes: ['East Baton Rouge', 'Orleans', 'Jefferson', 'Caddo', 'Lafayette'],
+            orgName: 'Louisiana Growth Network',
+            subtitle: 'Second-Stage Program Tracker',
+            primaryColor: '#3b82f6'
+        };
+
         let companies = JSON.parse(localStorage.getItem('lgnCompanies')) || [];
 
         function renderTable() {
@@ -730,7 +957,209 @@
             }
         }
 
+        // Admin Functions
+        function openAdminModal() {
+            document.getElementById('adminModal').classList.add('active');
+            renderAdminSettings();
+        }
+
+        function closeAdminModal() {
+            document.getElementById('adminModal').classList.remove('active');
+        }
+
+        function renderAdminSettings() {
+            // Update header
+            document.querySelector('.header h1').textContent = adminSettings.orgName;
+            document.querySelector('.header p').textContent = adminSettings.subtitle;
+            
+            // Update form fields
+            document.getElementById('orgName').value = adminSettings.orgName;
+            document.getElementById('subtitle').value = adminSettings.subtitle;
+            document.getElementById('primaryColor').value = adminSettings.primaryColor;
+            
+            // Render program types
+            const programList = document.getElementById('programTypesList');
+            programList.innerHTML = adminSettings.programTypes.map((type, index) => `
+                <div class="tag">
+                    ${type}
+                    ${index > 0 ? `<button onclick="removeProgramType(${index})">×</button>` : ''}
+                </div>
+            `).join('');
+            
+            // Render status options
+            const statusList = document.getElementById('statusOptionsList');
+            statusList.innerHTML = adminSettings.statusOptions.map((status, index) => `
+                <div class="tag">
+                    ${status}
+                    ${index > 0 ? `<button onclick="removeStatusOption(${index})">×</button>` : ''}
+                </div>
+            `).join('');
+            
+            // Render parishes
+            const parishList = document.getElementById('parishList');
+            parishList.innerHTML = adminSettings.parishes.map((parish, index) => `
+                <div class="tag">
+                    ${parish}
+                    <button onclick="removeParish(${index})">×</button>
+                </div>
+            `).join('');
+            
+            // Update stats
+            document.getElementById('adminTotalCompanies').textContent = companies.length;
+            
+            // Update dropdowns in the main form
+            updateFormDropdowns();
+        }
+
+        function updateFormDropdowns() {
+            const programSelect = document.getElementById('program');
+            const programFilter = document.getElementById('programFilter');
+            const statusSelect = document.getElementById('status');
+            const statusFilter = document.getElementById('statusFilter');
+            
+            // Update program dropdowns
+            programSelect.innerHTML = '<option value="">Select Program</option>' + 
+                adminSettings.programTypes.map(type => `<option value="${type}">${type}</option>`).join('');
+            
+            programFilter.innerHTML = '<option value="">All Programs</option>' + 
+                adminSettings.programTypes.map(type => `<option value="${type}">${type}</option>`).join('');
+            
+            // Update status dropdowns
+            statusSelect.innerHTML = adminSettings.statusOptions.map(status => 
+                `<option value="${status}">${status}</option>`).join('');
+            
+            statusFilter.innerHTML = '<option value="">All Statuses</option>' + 
+                adminSettings.statusOptions.map(status => `<option value="${status}">${status}</option>`).join('');
+        }
+
+        function addProgramType() {
+            const input = document.getElementById('newProgramType');
+            const value = input.value.trim();
+            if (value && !adminSettings.programTypes.includes(value)) {
+                adminSettings.programTypes.push(value);
+                input.value = '';
+                renderAdminSettings();
+            }
+        }
+
+        function removeProgramType(index) {
+            if (confirm('Remove this program type? Companies with this type will keep their data.')) {
+                adminSettings.programTypes.splice(index, 1);
+                renderAdminSettings();
+            }
+        }
+
+        function addStatusOption() {
+            const input = document.getElementById('newStatusOption');
+            const value = input.value.trim();
+            if (value && !adminSettings.statusOptions.includes(value)) {
+                adminSettings.statusOptions.push(value);
+                input.value = '';
+                renderAdminSettings();
+            }
+        }
+
+        function removeStatusOption(index) {
+            if (confirm('Remove this status option? Companies with this status will keep their data.')) {
+                adminSettings.statusOptions.splice(index, 1);
+                renderAdminSettings();
+            }
+        }
+
+        function addParish() {
+            const input = document.getElementById('newParish');
+            const value = input.value.trim();
+            if (value && !adminSettings.parishes.includes(value)) {
+                adminSettings.parishes.push(value);
+                input.value = '';
+                renderAdminSettings();
+            }
+        }
+
+        function removeParish(index) {
+            adminSettings.parishes.splice(index, 1);
+            renderAdminSettings();
+        }
+
+        function saveAdminSettings() {
+            adminSettings.orgName = document.getElementById('orgName').value;
+            adminSettings.subtitle = document.getElementById('subtitle').value;
+            adminSettings.primaryColor = document.getElementById('primaryColor').value;
+            
+            localStorage.setItem('lgnAdminSettings', JSON.stringify(adminSettings));
+            
+            // Apply color change
+            document.documentElement.style.setProperty('--primary-color', adminSettings.primaryColor);
+            
+            renderAdminSettings();
+            alert('Settings saved successfully!');
+        }
+
+        function resetToDefaults() {
+            if (confirm('Reset all settings to defaults? This will not delete your company data.')) {
+                adminSettings = {
+                    programTypes: ['SIG', 'CEO Roundtable', 'Other'],
+                    statusOptions: ['Pending', 'Active', 'Completed'],
+                    parishes: ['East Baton Rouge', 'Orleans', 'Jefferson', 'Caddo', 'Lafayette'],
+                    orgName: 'Louisiana Growth Network',
+                    subtitle: 'Second-Stage Program Tracker',
+                    primaryColor: '#3b82f6'
+                };
+                localStorage.setItem('lgnAdminSettings', JSON.stringify(adminSettings));
+                renderAdminSettings();
+                alert('Settings reset to defaults!');
+            }
+        }
+
+        function exportBackup() {
+            const backup = {
+                companies: companies,
+                adminSettings: adminSettings,
+                exportDate: new Date().toISOString()
+            };
+            
+            const dataStr = JSON.stringify(backup, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `lgn-backup-${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        }
+
+        function importBackup(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const backup = JSON.parse(e.target.result);
+                    
+                    if (confirm(`Import backup from ${new Date(backup.exportDate).toLocaleDateString()}? This will overwrite current data.`)) {
+                        companies = backup.companies || [];
+                        adminSettings = backup.adminSettings || adminSettings;
+                        
+                        localStorage.setItem('lgnCompanies', JSON.stringify(companies));
+                        localStorage.setItem('lgnAdminSettings', JSON.stringify(adminSettings));
+                        
+                        renderTable();
+                        renderAdminSettings();
+                        alert('Backup imported successfully!');
+                    }
+                } catch (error) {
+                    alert('Error importing backup: Invalid file format');
+                }
+            };
+            reader.readAsText(file);
+        }
+
         // Initialize
+        updateFormDropdowns();
+        renderAdminSettings();
         renderTable();
     </script>
 </body>
