@@ -1,0 +1,1166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LGN Second-Stage Program Tracker</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 14px;
+        }
+
+        .main-content {
+            padding: 30px;
+        }
+
+        .controls {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #2563eb;
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: #10b981;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #059669;
+            transform: translateY(-1px);
+        }
+
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+            transform: translateY(-1px);
+        }
+
+        .search-filter {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .search-filter input,
+        .search-filter select {
+            padding: 10px 15px;
+            border: 2px solid #e5e7eb;
+            border-radius: 6px;
+            font-size: 14px;
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .search-filter input:focus,
+        .search-filter select:focus {
+            outline: none;
+            border-color: #3b82f6;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+        }
+
+        thead {
+            background: #f9fafb;
+        }
+
+        th {
+            padding: 14px 16px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 13px;
+            color: #374151;
+            border-bottom: 2px solid #e5e7eb;
+            white-space: nowrap;
+        }
+
+        td {
+            padding: 14px 16px;
+            border-bottom: 1px solid #f3f4f6;
+            font-size: 14px;
+            color: #1f2937;
+        }
+
+        tbody tr:hover {
+            background: #f9fafb;
+        }
+
+        .actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-small {
+            padding: 6px 12px;
+            font-size: 12px;
+            border-radius: 4px;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.6);
+            z-index: 1000;
+            overflow-y: auto;
+        }
+
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            padding: 20px 30px;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h2 {
+            font-size: 20px;
+            color: #1f2937;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 28px;
+            color: #6b7280;
+            cursor: pointer;
+            line-height: 1;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+        }
+
+        .close-btn:hover {
+            color: #1f2937;
+        }
+
+        .modal-body {
+            padding: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            font-size: 14px;
+            color: #374151;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 2px solid #e5e7eb;
+            border-radius: 6px;
+            font-size: 14px;
+            font-family: inherit;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #3b82f6;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .stat-card h3 {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-bottom: 8px;
+        }
+
+        .stat-card p {
+            font-size: 32px;
+            font-weight: 700;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #6b7280;
+        }
+
+        .empty-state svg {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 20px;
+            opacity: 0.3;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .status-active {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .status-completed {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .status-pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .admin-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            transition: transform 0.2s;
+            z-index: 999;
+        }
+
+        .admin-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .admin-panel {
+            background: #f9fafb;
+            border-left: 3px solid #3b82f6;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+        }
+
+        .admin-panel h3 {
+            color: #1f2937;
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+
+        .admin-section {
+            background: white;
+            padding: 20px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            border: 1px solid #e5e7eb;
+        }
+
+        .admin-section h4 {
+            font-size: 14px;
+            color: #374151;
+            margin-bottom: 12px;
+            font-weight: 600;
+        }
+
+        .setting-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #f3f4f6;
+        }
+
+        .setting-row:last-child {
+            border-bottom: none;
+        }
+
+        .setting-label {
+            font-size: 14px;
+            color: #1f2937;
+        }
+
+        .tag-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .tag {
+            background: #e0e7ff;
+            color: #3730a3;
+            padding: 6px 12px;
+            border-radius: 16px;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .tag button {
+            background: none;
+            border: none;
+            color: #3730a3;
+            cursor: pointer;
+            font-size: 16px;
+            line-height: 1;
+            padding: 0;
+        }
+
+        .tag button:hover {
+            color: #1e1b4b;
+        }
+
+        .add-item-form {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .add-item-form input {
+            flex: 1;
+            padding: 8px 12px;
+            border: 2px solid #e5e7eb;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .add-item-form button {
+            padding: 8px 16px;
+            background: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .add-item-form button:hover {
+            background: #2563eb;
+        }
+
+        .color-input {
+            width: 60px;
+            height: 36px;
+            border: 2px solid #e5e7eb;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Louisiana Growth Network</h1>
+            <p>Second-Stage Program Tracker</p>
+        </div>
+
+        <div class="main-content">
+            <div class="stats" id="stats">
+                <div class="stat-card">
+                    <h3>Total Companies</h3>
+                    <p id="totalCompanies">0</p>
+                </div>
+                <div class="stat-card">
+                    <h3>Active Programs</h3>
+                    <p id="activePrograms">0</p>
+                </div>
+                <div class="stat-card">
+                    <h3>Completed Programs</h3>
+                    <p id="completedPrograms">0</p>
+                </div>
+            </div>
+
+            <div class="controls">
+                <button class="btn btn-primary" onclick="openModal()">+ Add Company</button>
+                <button class="btn btn-secondary" onclick="exportToCSV()">Export to CSV</button>
+                <button class="btn btn-secondary" onclick="exportForSalesforce()">Export for Salesforce</button>
+                <button class="btn btn-danger" onclick="clearAllData()">Clear All Data</button>
+            </div>
+
+            <div class="search-filter">
+                <input type="text" id="searchInput" placeholder="Search companies..." onkeyup="filterTable()">
+                <select id="programFilter" onchange="filterTable()">
+                    <option value="">All Programs</option>
+                    <option value="SIG">SIG Program</option>
+                    <option value="CEO Roundtable">CEO Roundtable</option>
+                    <option value="Other">Other</option>
+                </select>
+                <select id="statusFilter" onchange="filterTable()">
+                    <option value="">All Statuses</option>
+                    <option value="Active">Active</option>
+                    <option value="Completed">Completed</option>
+                    <option value="Pending">Pending</option>
+                </select>
+            </div>
+
+            <div class="table-container">
+                <table id="companyTable">
+                    <thead>
+                        <tr>
+                            <th>Company Name</th>
+                            <th>Program</th>
+                            <th>Status</th>
+                            <th>Start Date</th>
+                            <th>Contact Person</th>
+                            <th>Location</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody">
+                        <tr>
+                            <td colspan="7" class="empty-state">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                                </svg>
+                                <h3>No companies yet</h3>
+                                <p>Click "Add Company" to get started</p>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div id="companyModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Add Company</h2>
+                <button class="close-btn" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="companyForm" onsubmit="saveCompany(event)">
+                    <input type="hidden" id="companyId">
+                    
+                    <div class="form-group">
+                        <label for="companyName">Company Name *</label>
+                        <input type="text" id="companyName" required>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="program">Program *</label>
+                            <select id="program" required>
+                                <option value="">Select Program</option>
+                                <option value="SIG">SIG Program</option>
+                                <option value="CEO Roundtable">CEO Roundtable</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="status">Status *</label>
+                            <select id="status" required>
+                                <option value="Pending">Pending</option>
+                                <option value="Active">Active</option>
+                                <option value="Completed">Completed</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="startDate">Start Date</label>
+                            <input type="date" id="startDate">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="endDate">End Date</label>
+                            <input type="date" id="endDate">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="contactPerson">Contact Person</label>
+                        <input type="text" id="contactPerson">
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="contactEmail">Email</label>
+                            <input type="email" id="contactEmail">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="contactPhone">Phone</label>
+                            <input type="tel" id="contactPhone">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="city">City</label>
+                            <input type="text" id="city">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="parish">Parish</label>
+                            <input type="text" id="parish">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="industry">Industry</label>
+                        <input type="text" id="industry">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="employeeCount">Employee Count</label>
+                        <input type="number" id="employeeCount" min="0">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="notes">Notes</label>
+                        <textarea id="notes"></textarea>
+                    </div>
+
+                    <div class="controls">
+                        <button type="submit" class="btn btn-primary">Save Company</button>
+                        <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Modal -->
+    <div id="adminModal" class="modal">
+        <div class="modal-content" style="max-width: 800px;">
+            <div class="modal-header">
+                <h2>Admin Dashboard</h2>
+                <button class="close-btn" onclick="closeAdminModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="admin-panel">
+                    <h3>⚙️ System Settings</h3>
+                    
+                    <div class="admin-section">
+                        <h4>Program Types</h4>
+                        <div class="tag-list" id="programTypesList"></div>
+                        <div class="add-item-form">
+                            <input type="text" id="newProgramType" placeholder="Add new program type...">
+                            <button onclick="addProgramType()">Add</button>
+                        </div>
+                    </div>
+
+                    <div class="admin-section">
+                        <h4>Status Options</h4>
+                        <div class="tag-list" id="statusOptionsList"></div>
+                        <div class="add-item-form">
+                            <input type="text" id="newStatusOption" placeholder="Add new status...">
+                            <button onclick="addStatusOption()">Add</button>
+                        </div>
+                    </div>
+
+                    <div class="admin-section">
+                        <h4>Louisiana Parishes (Quick Add)</h4>
+                        <div class="tag-list" id="parishList"></div>
+                        <div class="add-item-form">
+                            <input type="text" id="newParish" placeholder="Add parish...">
+                            <button onclick="addParish()">Add</button>
+                        </div>
+                    </div>
+
+                    <div class="admin-section">
+                        <h4>Appearance Settings</h4>
+                        <div class="setting-row">
+                            <span class="setting-label">Organization Name</span>
+                            <input type="text" id="orgName" style="width: 300px; padding: 8px; border: 2px solid #e5e7eb; border-radius: 6px;" value="Louisiana Growth Network">
+                        </div>
+                        <div class="setting-row">
+                            <span class="setting-label">Subtitle</span>
+                            <input type="text" id="subtitle" style="width: 300px; padding: 8px; border: 2px solid #e5e7eb; border-radius: 6px;" value="Second-Stage Program Tracker">
+                        </div>
+                        <div class="setting-row">
+                            <span class="setting-label">Primary Color</span>
+                            <input type="color" id="primaryColor" class="color-input" value="#3b82f6">
+                        </div>
+                    </div>
+
+                    <div class="admin-section">
+                        <h4>Data Management</h4>
+                        <div class="setting-row">
+                            <span class="setting-label">Total Companies</span>
+                            <span id="adminTotalCompanies" style="font-weight: 600;">0</span>
+                        </div>
+                        <div class="setting-row">
+                            <span class="setting-label">Export Data Backup</span>
+                            <button class="btn btn-secondary btn-small" onclick="exportBackup()">Download Backup JSON</button>
+                        </div>
+                        <div class="setting-row">
+                            <span class="setting-label">Import Data Backup</span>
+                            <input type="file" id="importBackup" accept=".json" onchange="importBackup(event)" style="font-size: 14px;">
+                        </div>
+                    </div>
+
+                    <div class="controls">
+                        <button class="btn btn-primary" onclick="saveAdminSettings()">Save Settings</button>
+                        <button class="btn btn-secondary" onclick="resetToDefaults()">Reset to Defaults</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Button -->
+    <button class="admin-btn" onclick="openAdminModal()" title="Admin Dashboard">⚙️</button>
+
+    <script>
+        // Admin Settings with Defaults
+        let adminSettings = JSON.parse(localStorage.getItem('lgnAdminSettings')) || {
+            programTypes: ['SIG', 'CEO Roundtable', 'Other'],
+            statusOptions: ['Pending', 'Active', 'Completed'],
+            parishes: ['East Baton Rouge', 'Orleans', 'Jefferson', 'Caddo', 'Lafayette'],
+            orgName: 'Louisiana Growth Network',
+            subtitle: 'Second-Stage Program Tracker',
+            primaryColor: '#3b82f6'
+        };
+
+        let companies = JSON.parse(localStorage.getItem('lgnCompanies')) || [];
+
+        function renderTable() {
+            const tbody = document.getElementById('tableBody');
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const programFilter = document.getElementById('programFilter').value;
+            const statusFilter = document.getElementById('statusFilter').value;
+
+            let filteredCompanies = companies.filter(company => {
+                const matchesSearch = company.companyName.toLowerCase().includes(searchTerm) ||
+                                    (company.contactPerson && company.contactPerson.toLowerCase().includes(searchTerm));
+                const matchesProgram = !programFilter || company.program === programFilter;
+                const matchesStatus = !statusFilter || company.status === statusFilter;
+                return matchesSearch && matchesProgram && matchesStatus;
+            });
+
+            if (filteredCompanies.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="7" class="empty-state">
+                            <h3>No companies found</h3>
+                            <p>Try adjusting your filters or add a new company</p>
+                        </td>
+                    </tr>
+                `;
+            } else {
+                tbody.innerHTML = filteredCompanies.map(company => `
+                    <tr>
+                        <td><strong>${company.companyName}</strong></td>
+                        <td>${company.program}</td>
+                        <td><span class="status-badge status-${company.status.toLowerCase()}">${company.status}</span></td>
+                        <td>${company.startDate || 'N/A'}</td>
+                        <td>${company.contactPerson || 'N/A'}</td>
+                        <td>${company.city ? company.city + (company.parish ? ', ' + company.parish : '') : 'N/A'}</td>
+                        <td class="actions">
+                            <button class="btn btn-primary btn-small" onclick="editCompany('${company.id}')">Edit</button>
+                            <button class="btn btn-danger btn-small" onclick="deleteCompany('${company.id}')">Delete</button>
+                        </td>
+                    </tr>
+                `).join('');
+            }
+
+            updateStats();
+        }
+
+        function updateStats() {
+            document.getElementById('totalCompanies').textContent = companies.length;
+            document.getElementById('activePrograms').textContent = companies.filter(c => c.status === 'Active').length;
+            document.getElementById('completedPrograms').textContent = companies.filter(c => c.status === 'Completed').length;
+        }
+
+        function openModal(companyId = null) {
+            const modal = document.getElementById('companyModal');
+            const form = document.getElementById('companyForm');
+            
+            if (companyId) {
+                const company = companies.find(c => c.id === companyId);
+                document.getElementById('modalTitle').textContent = 'Edit Company';
+                document.getElementById('companyId').value = company.id;
+                document.getElementById('companyName').value = company.companyName;
+                document.getElementById('program').value = company.program;
+                document.getElementById('status').value = company.status;
+                document.getElementById('startDate').value = company.startDate || '';
+                document.getElementById('endDate').value = company.endDate || '';
+                document.getElementById('contactPerson').value = company.contactPerson || '';
+                document.getElementById('contactEmail').value = company.contactEmail || '';
+                document.getElementById('contactPhone').value = company.contactPhone || '';
+                document.getElementById('city').value = company.city || '';
+                document.getElementById('parish').value = company.parish || '';
+                document.getElementById('industry').value = company.industry || '';
+                document.getElementById('employeeCount').value = company.employeeCount || '';
+                document.getElementById('notes').value = company.notes || '';
+            } else {
+                document.getElementById('modalTitle').textContent = 'Add Company';
+                form.reset();
+                document.getElementById('companyId').value = '';
+            }
+            
+            modal.classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('companyModal').classList.remove('active');
+        }
+
+        function saveCompany(event) {
+            event.preventDefault();
+            
+            const companyId = document.getElementById('companyId').value;
+            const companyData = {
+                id: companyId || Date.now().toString(),
+                companyName: document.getElementById('companyName').value,
+                program: document.getElementById('program').value,
+                status: document.getElementById('status').value,
+                startDate: document.getElementById('startDate').value,
+                endDate: document.getElementById('endDate').value,
+                contactPerson: document.getElementById('contactPerson').value,
+                contactEmail: document.getElementById('contactEmail').value,
+                contactPhone: document.getElementById('contactPhone').value,
+                city: document.getElementById('city').value,
+                parish: document.getElementById('parish').value,
+                industry: document.getElementById('industry').value,
+                employeeCount: document.getElementById('employeeCount').value,
+                notes: document.getElementById('notes').value,
+                createdAt: companyId ? companies.find(c => c.id === companyId).createdAt : new Date().toISOString(),
+                updatedAt: new Date().toISOString()
+            };
+
+            if (companyId) {
+                const index = companies.findIndex(c => c.id === companyId);
+                companies[index] = companyData;
+            } else {
+                companies.push(companyData);
+            }
+
+            localStorage.setItem('lgnCompanies', JSON.stringify(companies));
+            closeModal();
+            renderTable();
+        }
+
+        function editCompany(id) {
+            openModal(id);
+        }
+
+        function deleteCompany(id) {
+            if (confirm('Are you sure you want to delete this company?')) {
+                companies = companies.filter(c => c.id !== id);
+                localStorage.setItem('lgnCompanies', JSON.stringify(companies));
+                renderTable();
+            }
+        }
+
+        function filterTable() {
+            renderTable();
+        }
+
+        function exportToCSV() {
+            if (companies.length === 0) {
+                alert('No data to export');
+                return;
+            }
+
+            const headers = ['Company Name', 'Program', 'Status', 'Start Date', 'End Date', 'Contact Person', 
+                           'Email', 'Phone', 'City', 'Parish', 'Industry', 'Employee Count', 'Notes', 'Created', 'Updated'];
+            
+            const csvContent = [
+                headers.join(','),
+                ...companies.map(c => [
+                    `"${c.companyName}"`,
+                    `"${c.program}"`,
+                    `"${c.status}"`,
+                    c.startDate || '',
+                    c.endDate || '',
+                    `"${c.contactPerson || ''}"`,
+                    c.contactEmail || '',
+                    c.contactPhone || '',
+                    `"${c.city || ''}"`,
+                    `"${c.parish || ''}"`,
+                    `"${c.industry || ''}"`,
+                    c.employeeCount || '',
+                    `"${(c.notes || '').replace(/"/g, '""')}"`,
+                    c.createdAt || '',
+                    c.updatedAt || ''
+                ].join(','))
+            ].join('\n');
+
+            downloadFile(csvContent, 'lgn-companies.csv', 'text/csv');
+        }
+
+        function exportForSalesforce() {
+            if (companies.length === 0) {
+                alert('No data to export');
+                return;
+            }
+
+            const headers = ['Account Name', 'Phone', 'Email', 'City', 'Parish', 'Industry', 
+                           'Employees', 'Program Type', 'Status', 'Start Date', 'End Date', 'Description'];
+            
+            const csvContent = [
+                headers.join(','),
+                ...companies.map(c => [
+                    `"${c.companyName}"`,
+                    c.contactPhone || '',
+                    c.contactEmail || '',
+                    `"${c.city || ''}"`,
+                    `"${c.parish || ''}"`,
+                    `"${c.industry || ''}"`,
+                    c.employeeCount || '',
+                    `"${c.program}"`,
+                    `"${c.status}"`,
+                    c.startDate || '',
+                    c.endDate || '',
+                    `"${(c.notes || '').replace(/"/g, '""')} - Contact: ${c.contactPerson || 'N/A'}"`
+                ].join(','))
+            ].join('\n');
+
+            downloadFile(csvContent, 'lgn-salesforce-import.csv', 'text/csv');
+        }
+
+        function downloadFile(content, filename, type) {
+            const blob = new Blob([content], { type });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = filename;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        }
+
+        function clearAllData() {
+            if (confirm('Are you sure you want to delete ALL company data? This cannot be undone.')) {
+                if (confirm('This will permanently delete ' + companies.length + ' companies. Are you absolutely sure?')) {
+                    companies = [];
+                    localStorage.removeItem('lgnCompanies');
+                    renderTable();
+                }
+            }
+        }
+
+        // Admin Functions
+        function openAdminModal() {
+            document.getElementById('adminModal').classList.add('active');
+            renderAdminSettings();
+        }
+
+        function closeAdminModal() {
+            document.getElementById('adminModal').classList.remove('active');
+        }
+
+        function renderAdminSettings() {
+            // Update header
+            document.querySelector('.header h1').textContent = adminSettings.orgName;
+            document.querySelector('.header p').textContent = adminSettings.subtitle;
+            
+            // Update form fields
+            document.getElementById('orgName').value = adminSettings.orgName;
+            document.getElementById('subtitle').value = adminSettings.subtitle;
+            document.getElementById('primaryColor').value = adminSettings.primaryColor;
+            
+            // Render program types
+            const programList = document.getElementById('programTypesList');
+            programList.innerHTML = adminSettings.programTypes.map((type, index) => `
+                <div class="tag">
+                    ${type}
+                    ${index > 0 ? `<button onclick="removeProgramType(${index})">×</button>` : ''}
+                </div>
+            `).join('');
+            
+            // Render status options
+            const statusList = document.getElementById('statusOptionsList');
+            statusList.innerHTML = adminSettings.statusOptions.map((status, index) => `
+                <div class="tag">
+                    ${status}
+                    ${index > 0 ? `<button onclick="removeStatusOption(${index})">×</button>` : ''}
+                </div>
+            `).join('');
+            
+            // Render parishes
+            const parishList = document.getElementById('parishList');
+            parishList.innerHTML = adminSettings.parishes.map((parish, index) => `
+                <div class="tag">
+                    ${parish}
+                    <button onclick="removeParish(${index})">×</button>
+                </div>
+            `).join('');
+            
+            // Update stats
+            document.getElementById('adminTotalCompanies').textContent = companies.length;
+            
+            // Update dropdowns in the main form
+            updateFormDropdowns();
+        }
+
+        function updateFormDropdowns() {
+            const programSelect = document.getElementById('program');
+            const programFilter = document.getElementById('programFilter');
+            const statusSelect = document.getElementById('status');
+            const statusFilter = document.getElementById('statusFilter');
+            
+            // Update program dropdowns
+            programSelect.innerHTML = '<option value="">Select Program</option>' + 
+                adminSettings.programTypes.map(type => `<option value="${type}">${type}</option>`).join('');
+            
+            programFilter.innerHTML = '<option value="">All Programs</option>' + 
+                adminSettings.programTypes.map(type => `<option value="${type}">${type}</option>`).join('');
+            
+            // Update status dropdowns
+            statusSelect.innerHTML = adminSettings.statusOptions.map(status => 
+                `<option value="${status}">${status}</option>`).join('');
+            
+            statusFilter.innerHTML = '<option value="">All Statuses</option>' + 
+                adminSettings.statusOptions.map(status => `<option value="${status}">${status}</option>`).join('');
+        }
+
+        function addProgramType() {
+            const input = document.getElementById('newProgramType');
+            const value = input.value.trim();
+            if (value && !adminSettings.programTypes.includes(value)) {
+                adminSettings.programTypes.push(value);
+                input.value = '';
+                renderAdminSettings();
+            }
+        }
+
+        function removeProgramType(index) {
+            if (confirm('Remove this program type? Companies with this type will keep their data.')) {
+                adminSettings.programTypes.splice(index, 1);
+                renderAdminSettings();
+            }
+        }
+
+        function addStatusOption() {
+            const input = document.getElementById('newStatusOption');
+            const value = input.value.trim();
+            if (value && !adminSettings.statusOptions.includes(value)) {
+                adminSettings.statusOptions.push(value);
+                input.value = '';
+                renderAdminSettings();
+            }
+        }
+
+        function removeStatusOption(index) {
+            if (confirm('Remove this status option? Companies with this status will keep their data.')) {
+                adminSettings.statusOptions.splice(index, 1);
+                renderAdminSettings();
+            }
+        }
+
+        function addParish() {
+            const input = document.getElementById('newParish');
+            const value = input.value.trim();
+            if (value && !adminSettings.parishes.includes(value)) {
+                adminSettings.parishes.push(value);
+                input.value = '';
+                renderAdminSettings();
+            }
+        }
+
+        function removeParish(index) {
+            adminSettings.parishes.splice(index, 1);
+            renderAdminSettings();
+        }
+
+        function saveAdminSettings() {
+            adminSettings.orgName = document.getElementById('orgName').value;
+            adminSettings.subtitle = document.getElementById('subtitle').value;
+            adminSettings.primaryColor = document.getElementById('primaryColor').value;
+            
+            localStorage.setItem('lgnAdminSettings', JSON.stringify(adminSettings));
+            
+            // Apply color change
+            document.documentElement.style.setProperty('--primary-color', adminSettings.primaryColor);
+            
+            renderAdminSettings();
+            alert('Settings saved successfully!');
+        }
+
+        function resetToDefaults() {
+            if (confirm('Reset all settings to defaults? This will not delete your company data.')) {
+                adminSettings = {
+                    programTypes: ['SIG', 'CEO Roundtable', 'Other'],
+                    statusOptions: ['Pending', 'Active', 'Completed'],
+                    parishes: ['East Baton Rouge', 'Orleans', 'Jefferson', 'Caddo', 'Lafayette'],
+                    orgName: 'Louisiana Growth Network',
+                    subtitle: 'Second-Stage Program Tracker',
+                    primaryColor: '#3b82f6'
+                };
+                localStorage.setItem('lgnAdminSettings', JSON.stringify(adminSettings));
+                renderAdminSettings();
+                alert('Settings reset to defaults!');
+            }
+        }
+
+        function exportBackup() {
+            const backup = {
+                companies: companies,
+                adminSettings: adminSettings,
+                exportDate: new Date().toISOString()
+            };
+            
+            const dataStr = JSON.stringify(backup, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `lgn-backup-${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        }
+
+        function importBackup(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const backup = JSON.parse(e.target.result);
+                    
+                    if (confirm(`Import backup from ${new Date(backup.exportDate).toLocaleDateString()}? This will overwrite current data.`)) {
+                        companies = backup.companies || [];
+                        adminSettings = backup.adminSettings || adminSettings;
+                        
+                        localStorage.setItem('lgnCompanies', JSON.stringify(companies));
+                        localStorage.setItem('lgnAdminSettings', JSON.stringify(adminSettings));
+                        
+                        renderTable();
+                        renderAdminSettings();
+                        alert('Backup imported successfully!');
+                    }
+                } catch (error) {
+                    alert('Error importing backup: Invalid file format');
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        // Initialize
+        updateFormDropdowns();
+        renderAdminSettings();
+        renderTable();
+    </script>
+</body>
+</html>
